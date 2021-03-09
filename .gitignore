@@ -1,6 +1,7 @@
 .ccls
 .ccls-cache
 .vscode
+.vim
 
 bowman_de10_lite/hardware/quartus/.qsys_system
 bowman_de10_lite/hardware/quartus/.qsys_edit
