@@ -1,18 +1,14 @@
 import { Application } from "https://deno.land/x/oak/mod.ts";
 import { router } from "./router.ts";
-import { Player } from "./models/player.ts";
+import { Session } from "./models/session.ts";
 
 declare global {
-  let players: Player[];
-  const c: number;
   interface Window {
-    players: Player[];
-    c: number;
+    sessions: Map<number, Session>;
   }
 }
 
-window.players = [];
-window.c = 0.025 + Math.ceil(Math.random() * 5) / 1000; // air drag
+window.sessions = new Map();
 
 const app = new Application();
 const port = 8080;

@@ -32,6 +32,7 @@ export class Player {
     if (this.hp > 0) {
       this.hp -= x;
     }
+    this.hp = this.hp < 0 ? 0 : this.hp;
     return this.hp;
   }
 }
