@@ -1,9 +1,3 @@
-declare global {
-  interface Window {
-    c: number;
-  }
-}
-
 export class Arrow {
   private a = -10; // acceleration
   private t = 0.02; // time interval for each iteration

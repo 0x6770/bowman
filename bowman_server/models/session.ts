@@ -1,5 +1,4 @@
-import { v4 } from "https://deno.land/std@0.89.0/uuid/mod.ts";
-import { assert } from "https://deno.land/std@0.89.0/testing/asserts.ts";
+import { v4, assert } from "../dependents.ts";
 import { Player } from "./player.ts";
 import { Arrow } from "./arrow.ts";
 
@@ -12,7 +11,13 @@ export class Session {
   }
 
   public addPlayer(player: Player) {
+    console.log(`${player.getName()} joined game`);
     this.players.set(player.getId(), player);
+  }
+
+  public deletePlayer(id: string) {
+    console.log(`${this.players.get(id)!.getName()} quit game`);
+    this.players.delete(id);
   }
 
   public getPlayers() {

@@ -1,17 +1,11 @@
-import { Request, Response } from "https://deno.land/x/oak/mod.ts";
-import { Session } from "../models/session.ts";
+import { Request, Response } from "../dependents.ts";
+import "../global.ts";
 
 // valid range for velocity and angle
 const VMIN = 0;
 const VMAX = 100;
 const AMIN = 0;
 const AMAX = 180;
-
-declare global {
-  interface Window {
-    sessions: Map<number, Session>;
-  }
-}
 
 export const fire = async ({
   request,
@@ -42,15 +36,6 @@ export const fire = async ({
     return;
   }
 
-  // validate `code`
-  if (!window.sessions.has(code)) {
-    const msg = "Invalid parameter `code`.";
-    console.error(msg);
-    response.status = 401;
-    response.body = { message: msg };
-    return;
-  }
-
   // validate angle
   if (angle > AMAX || angle < AMIN) {
     const msg =
@@ -72,9 +57,11 @@ export const fire = async ({
   }
 
   // validate `id` and fire an arrow if success
-  const { msg, x } = window.sessions
-    .get(code)!
-    .fireArrow({ id: id, angle: angle, velocity: velocity });
+  const { msg, x } = window.session.fireArrow({
+    id: id,
+    angle: angle,
+    velocity: velocity,
+  });
 
   if (msg === "Invalid id") {
     const msg = "Invalid parameter `id`.";

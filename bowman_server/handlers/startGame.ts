@@ -1,11 +1,7 @@
-import { Response } from "https://deno.land/x/oak/mod.ts";
+import { Response } from "../dependents.ts";
 import { Session } from "../models/session.ts";
 
-declare global {
-  interface Window {
-    sessions: Map<number, Session>;
-  }
-}
+import "../global.ts";
 
 const codeMax = 200000;
 const sessionCodes: Set<number> = new Set();
@@ -25,7 +21,7 @@ const generateUniqCode = (): number => {
 export const startGame = ({ response }: { response: Response }) => {
   const code: number = generateUniqCode();
   const session: Session = new Session({ code });
-  window.sessions.set(code, session);
+  window.session = session;
   console.log("Started new Game:", code);
   response.status = 200;
   response.body = { code: code };
