@@ -1,4 +1,4 @@
-interface Coord {
+interface Coordination {
   x: number
   y: number
 }
@@ -8,52 +8,49 @@ const SCALE: number = window.innerWidth / 100
 class Arrow {
   private color: string = "#666666";
   private length: number = 40;
-  // private tip: Coord
-  private tail: Coord
+  private tail: Coordination
   private ground_level: number
   private angle: number = 45;
   private vx: number = 0;
   private vy: number = 0;
   private firing: boolean = false;
-  private collided: number = 0;
+  private collided: boolean = false;
   private a = -10; // acceleration
   private t = 0.02; // time interval for each iteration
-  private c = 0.025 + Math.ceil(Math.random() * 5) / 1000; // air drag
+  private c: number
+  // private c = 0.025 + Math.ceil(Math.random() * 5) / 1000; // air drag
+  window_width = window.innerWidth
+  window_height = window.innerHeight
 
   constructor(
     x: number,
     ground_level: number,
+    c: number,
     color: string
   ) {
-    console.log(`SCALE: ${SCALE}`)
+    // console.log(`SCALE: ${SCALE}`)
     this.ground_level = ground_level
     this.color = color
+    this.c = c
     this.tail = {
       x: Math.round(x),
       y: 0
     }
-    // this.tip = {
-    //   x: Math.round(x + this.length * Math.cos(this.angle)),
-    //   y: Math.round(0 + this.length * Math.sin(this.angle))
-    // }
   }
 
   private updateAngle = () => {
     this.angle = Math.atan2(this.vy, this.vx)
   };
 
-  // TODO: use tip position to check collision
-  private checkCollision = (window_width: number, window_height: number) => {
+  private checkCollision = () => {
     if (this.firing) {
-      const tipx = this.tail.x + this.length * Math.cos(this.angle)
-      const tipy = this.tail.y + this.length * Math.sin(this.angle)
-      if (this.tail.x < 0 || this.tail.x > window_width || this.tail.y <= 0) {
-        this.collided = 1
+      if (this.tail.x < 0 || this.tail.x > this.window_width || this.tail.y <= 0) {
+        this.collided = true
       }
     }
   };
 
-  private update = (window_width: number, window_height: number) => {
+  public update = () => {
     if (this.firing && (!this.collided)) {
       this.tail.x += this.vx * this.t
       this.tail.y += (this.a * this.t ** 2) / 2 + this.vy * this.t
@@ -62,11 +59,7 @@ class Arrow {
       this.vy += this.a * this.t + (this.vy > 0 ? -this.c : this.c) * this.vy ** 2 * this.t
 
       this.updateAngle()
-      // this.tip = {
-      //   x: this.tail.x + this.length * Math.cos(this.angle),
-      //   y: this.tail.y + this.length * Math.sin(this.angle)
-      // }
-      this.checkCollision(window_width, window_height)
+      this.checkCollision()
     }
   };
 
@@ -86,44 +79,34 @@ class Arrow {
   };
 
   public adjustAngle = (angle: number) => {
-    console.log(`angle: ${angle}`)
-    if (!this.firing) {
-      this.angle = (angle / 180) * Math.PI
-      // this.tip = {
-      //   x: this.tail.x + this.length * Math.cos(this.angle),
-      //   y: this.tail.y + this.length * Math.sin(this.angle)
-      // }
-    }
+    // console.log(`angle: ${angle}`)
+    this.angle = (angle / 180) * Math.PI
   };
 
+  public isCollided = (): boolean => { return this.collided }
 
-  public render = (context: CanvasRenderingContext2D, window_width: number, window_height: number): number => {
-    if ((!this.collided) && context) {
-      this.update(window_width, window_height)
-    }
-    if (context) {
-      console.log(this.tail.x, this.tail.y)
+  public isFired = (): boolean => { return this.firing }
+
+  public render = (context: CanvasRenderingContext2D) => {
+    if (!this.collided) {
       context.save()
 
+      context.lineWidth = 3
+      context.strokeStyle = "black"
       context.beginPath()
       context.moveTo(this.tail.x * SCALE, window.innerHeight - (this.tail.y * SCALE + this.ground_level)) // y value in flipped upside down
-      context.lineTo(this.tail.x * SCALE + this.length * Math.cos(this.angle) / 2, window.innerHeight - (this.tail.y * SCALE + this.length * Math.sin(this.angle) / 2 + this.ground_level))
-      context.lineWidth = 3
-      context.strokeStyle = "blue"
+      context.lineTo(this.tail.x * SCALE + this.length * Math.cos(this.angle) * 0.9, window.innerHeight - (this.tail.y * SCALE + this.length * Math.sin(this.angle) * 0.9 + this.ground_level))
       context.stroke()
 
       context.beginPath()
-      context.moveTo(this.tail.x * SCALE + this.length * Math.cos(this.angle) / 2, window.innerHeight - (this.tail.y * SCALE + this.length * Math.sin(this.angle) / 2 + this.ground_level))
+      context.moveTo(this.tail.x * SCALE + this.length * Math.cos(this.angle) * 0.9, window.innerHeight - (this.tail.y * SCALE + this.length * Math.sin(this.angle) * 0.9 + this.ground_level))
       context.lineTo(this.tail.x * SCALE + this.length * Math.cos(this.angle), window.innerHeight - (this.tail.y * SCALE + this.length * Math.sin(this.angle) + this.ground_level))
-      context.lineWidth = 3
       context.strokeStyle = this.color
       context.stroke()
 
       context.restore()
     }
-    return this.collided
   };
 }
 
-// ((this.tail.y - this.ground_level) * SCALE + this.ground_level)
 export default Arrow

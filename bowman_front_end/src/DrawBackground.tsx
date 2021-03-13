@@ -1,4 +1,6 @@
-import React, { useRef, useEffect } from "react"
+import React from "react"
+import { Canvas } from "./createCanvas"
+
 
 interface BackgroundCanvasProps {
   width: number
@@ -6,20 +8,15 @@ interface BackgroundCanvasProps {
 }
 
 export const BackgroundCanvas = ({ width, height }: BackgroundCanvasProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const ground_level: number = 100
 
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const context = canvas?.getContext("2d")
-    if (context) {
-      context.fillStyle = "#333333"
-      context.fillRect(0, height - ground_level, width, ground_level)
-    }
-  }, [width, height])
+  const draw = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, index: number) => {
+    context.fillStyle = "#333333"
+    context.fillRect(0, height - ground_level, width, ground_level)
+  }
 
   return (
-    <canvas id="background" style={{ zIndex: -99 }} ref={canvasRef} width={width} height={height} />
+    <Canvas draw={draw} style={{ zIndex: -99 }} />
   )
 }
 
