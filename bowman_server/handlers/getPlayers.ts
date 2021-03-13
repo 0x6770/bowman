@@ -1,10 +1,4 @@
-import "../global.ts";
-
-interface PlayerStatus {
-  name: string;
-  hp: number;
-  x: number;
-}
+import { PlayerStatus } from "../global.ts";
 
 export const getPlayers = (): {
   msg: string;
@@ -18,6 +12,7 @@ export const getPlayers = (): {
       name: player.getName(),
       hp: player.getHp(),
       x: player.getX(),
+      color: player.getColor(),
     });
   });
 

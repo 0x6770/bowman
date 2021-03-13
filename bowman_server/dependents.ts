@@ -1,8 +1,12 @@
 import {
   Application,
+  send,
   Router,
   Request,
   Response,
+  Context,
+  RouterContext,
+  Middleware,
 } from "https://deno.land/x/oak/mod.ts";
 import {
   acceptWebSocket,
@@ -18,10 +22,11 @@ export {
   isWebSocketPingEvent,
   isWebSocketCloseEvent,
   Application,
+  send,
   Router,
   Request,
   Response,
   v4,
   assert,
 };
-export type { WebSocket };
+export type { WebSocket, Context, RouterContext, Middleware };

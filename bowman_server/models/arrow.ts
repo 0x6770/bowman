@@ -6,10 +6,13 @@ export class Arrow {
   private y: number;
   private vx = 0.0;
   private vy = 0.0;
+  private angle = 45;
+  private color: string;
 
-  constructor({ x, y }: { x: number; y: number }) {
+  constructor({ x, y, color }: { x: number; y: number; color: string }) {
     this.x = x;
     this.y = y;
+    this.color = color;
   }
 
   private update() {
@@ -23,12 +26,34 @@ export class Arrow {
     this.vx += (this.vx > 0 ? -this.c : this.c) * this.vx ** 2 * this.t;
   }
 
+  // used to give feed back when adjusting angle
+  public changeAngle(angle: number) {
+    this.angle = angle;
+  }
+
   public fire({ angle, velocity }: { angle: number; velocity: number }) {
     const angleInRadian = (angle / 180) * Math.PI;
     this.vx = velocity * Math.cos(angleInRadian);
     this.vy = velocity * Math.sin(angleInRadian);
   }
 
+  public getX() {
+    return this.x;
+  }
+
+  public getAngle() {
+    return this.angle;
+  }
+
+  public getColor() {
+    return this.color;
+  }
+
+  public getC() {
+    return this.c;
+  }
+
+  // return the final value of x after flight
   public getXDistance() {
     this.update();
     while (this.y > 0) {
