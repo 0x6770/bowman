@@ -10,7 +10,7 @@ interface CanvasProps {
     style?: react.CSSProperties
 }
 
-// deal with high pixel density, reduce bluriness
+// deal with high pixel density, reduce blurriness
 const resizeCanvasToDisplaySize = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D,) => {
     const { width, height } = canvas.getBoundingClientRect()
     if (canvas.width !== width || canvas.height !== height) {
@@ -22,7 +22,7 @@ const resizeCanvasToDisplaySize = (canvas: HTMLCanvasElement, context: CanvasRen
 }
 
 // adjust the size of the canvas
-function resizeCanvas(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D,) {
+const resizeCanvas = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => {
     const { width, height } = canvas.getBoundingClientRect()
     if (canvas.width !== width || canvas.height !== height) {
         const { devicePixelRatio = 1 } = window

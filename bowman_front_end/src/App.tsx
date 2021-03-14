@@ -6,7 +6,7 @@ import { DrawTrajectory } from "./DrawTrajectory"
 
 import { ArrowStatus, PlayerStatus } from "./types"
 
-const socket = new WebSocket('ws://127.0.0.1:8080/ws')
+const socket = new WebSocket('ws://localhost:8080/ws')
 
 const InputText = ({ label, value, onChange }: { label: string, value: string, onChange: Dispatch<SetStateAction<string>> }) => {
   return (
@@ -154,7 +154,7 @@ const Home = () => {
               // console.log(`fire: ${JSON.stringify(message)}`)
               setFiredArrows(prevFiredArrows =>
                 [...prevFiredArrows, {
-                  x: message.x,
+                  x0: message.x0,
                   c: message.c,
                   color: message.color,
                   angle: message.angle,
@@ -176,7 +176,7 @@ const Home = () => {
   return (
     <div>
       <BackgroundCanvas />
-      {!joined ? <JoinGame onChange={setJoined} /> : <Fire id={id} />}
+      {/* {!joined ? <JoinGame onChange={setJoined} /> : <Fire id={id} />} */}
       { PlayerCanvases}
       { ArrowCanvases}
       { TrajectoryCanvases}

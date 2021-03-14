@@ -1,12 +1,12 @@
 interface PlayerStatus {
     name: string
     hp: number
-    x: number
+    x0: number
     color: string
 }
 
 interface ArrowStatus {
-    x: number
+    x0: number
     angle: number
     c: number
     velocity: number

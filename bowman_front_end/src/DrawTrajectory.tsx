@@ -7,9 +7,9 @@ import { ArrowStatus } from "./types"
 const SCALE: number = window.innerWidth / 100
 
 export const DrawTrajectory = ({ trajectoryData }: { trajectoryData: ArrowStatus }) => {
-  const { x, angle, velocity, color, fire, c } = trajectoryData
+  const { x0, angle, velocity, color, fire, c } = trajectoryData
   const ground_level: number = 100
-  const trajectory = new Trajectory(x, ground_level, c, color)
+  const trajectory = new Trajectory(x0, ground_level, c, color)
 
   const draw = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, index: number) => {
     context.strokeStyle = color
