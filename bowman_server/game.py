@@ -13,7 +13,6 @@ if len(argv) > 2:
     PORT = argv[2]
 
 URL = "http://"+LOCATION+":"+str(PORT)
-print (URL)
 
 class Player:
     """Player: name, id, angle, velocity
@@ -78,6 +77,7 @@ def main():
     """
     if not is_server_up(LOCATION, PORT):
         print("server at {url} is not up, please check and retry".format(url = URL))
+        print("to use other address/port, run this script as ./game.py [address] [port]")
         return
     name = input("Please Enter Your Name: ")
     player = Player(name)
