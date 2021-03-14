@@ -1,11 +1,12 @@
 import { Request, Response } from "../dependents.ts";
-import "../global.ts";
+import { broadcast, msgUpdatePlayers } from "./handleWs.ts";
+import { wsMessage } from "../global.ts";
 
 // valid range for velocity and angle
-const VMIN = 0;
-const VMAX = 100;
-const AMIN = 0;
-const AMAX = 180;
+const angleMin = 0;
+const angleMax = 180;
+const velocityMin = 0;
+const velocityMax = 180;
 
 export const fire = async ({
   request,
@@ -25,10 +26,10 @@ export const fire = async ({
     return;
   }
 
-  const { code, id, angle, velocity } = await request.body().value;
+  const { id, angle, velocity } = await request.body().value;
 
   // check if request has required parameters
-  if (!(code && id && angle && velocity)) {
+  if (!(id && angle && velocity)) {
     const msg = "Missing required parameters.";
     console.error(msg);
     response.status = 401;
@@ -37,9 +38,8 @@ export const fire = async ({
   }
 
   // validate angle
-  if (angle > AMAX || angle < AMIN) {
-    const msg =
-      "Invalid value for `angle`, should between " + AMIN + " and " + AMAX;
+  if (angle > angleMax || angle < angleMin) {
+    const msg = `Invalid value for "angle", should between ${angleMin} and ${angleMax}`;
     console.error(msg);
     response.status = 401;
     response.body = { message: msg };
@@ -47,9 +47,8 @@ export const fire = async ({
   }
 
   // validate velocity
-  if (velocity > VMAX || velocity < VMIN) {
-    const msg =
-      "Invalid value for `velocity`, should between " + VMIN + " and " + VMAX;
+  if (velocity > velocityMax || velocity < velocityMin) {
+    const msg = `Invalid value for "velocity", should between ${velocityMin} and ${velocityMax}`;
     console.error(msg);
     response.status = 401;
     response.body = { message: msg };
@@ -57,7 +56,7 @@ export const fire = async ({
   }
 
   // validate `id` and fire an arrow if success
-  const { msg, x } = window.session.fireArrow({
+  const { msg, x0, x, c, color } = window.session.fireArrow({
     id: id,
     angle: angle,
     velocity: velocity,
@@ -77,6 +76,21 @@ export const fire = async ({
     return;
   }
 
+  const broadcastMsg: wsMessage = {
+    method: "fire",
+    msg: "success",
+    x0: x0,
+    x: x,
+    angle: angle,
+    velocity: velocity,
+    c: c,
+    color: color,
+    time: new Date(),
+  };
+
+  broadcast(broadcastMsg);
+  broadcast(msgUpdatePlayers());
+
   response.status = 200;
-  response.body = { x: x };
+  response.body = { msg: "success", x: x };
 };

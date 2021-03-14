@@ -1,7 +1,7 @@
 export class Arrow {
   private a = -10; // acceleration
   private t = 0.02; // time interval for each iteration
-  private c = 0.025 + Math.ceil(Math.random() * 5) / 1000; // air drag
+  private c = 0.025 + Math.ceil(Math.random() * 50) / 10000; // air drag
   private x: number;
   private y: number;
   private vx = 0.0;

@@ -1,62 +1,24 @@
 #!/bin/bash
 
-URL=http://localhost:8080
-SESSION=
-NAME=
+set -e
+
+URL="http://localhost:8080"
 ID=
-X=
+NAME=
+ANGLE=
 
-# start a session
-SESSION=$(curl -s -X POST -H 'Content-Type: application/json' "${URL}"/start | jq '.code')
-echo started session: ${SESSION}
+read -p "Please Enter Your Name: " NAME
 
-# add players 
-function addPlayer {
-  result=($(curl -s -X POST -H 'Content-Type: application/json'\
-        -d '{"code": '"$1"', "name": "'"$2"'"}'\
-        "${URL}"\
-        | jq '.id,.x')) # [id, x]
-  ID=${result[0]}
-  X=${result[1]}
-  NAME=$2
-  echo Added new player: $2
-}
+ID=$(curl -s -X POST -H 'Content-Type: application/json' "${URL}/join" \
+  -d '{"name":"'"${NAME}"'"}' | jq '.id')
 
-addPlayer $SESSION a
-addPlayer $SESSION b
-addPlayer $SESSION c
-addPlayer $SESSION d
+echo "${ID}"
 
-# print all players
-function printAll {
-  printf "=========================\n"
-  printf "name\thp\tx\n"
-  printf "=========================\n"
-  curl -s -X GET -H 'Content-Type: application/json'\
-    -d '{"code": '"${SESSION}"'}'\
-    "${URL}"/players\
-    | jq -r '.[] | "\(.name)\t\(.hp)\t\(.x)"'
-}
+echo "TEST: adjust the angle to 60 degrees"
+curl -s -X POST -H 'Content-Type: application/json' "${URL}/angle" \
+  -d '{"id":'"${ID}"',"angle":60}'
 
-# fire an arrow
-function fire {
-x=$(curl -s -X POST -H 'Content-Type: application/json'\
-  -d '{"code": '"${SESSION}"', "id": '"${ID}"', "angle": '"$1"', "velocity": '"$2"'}'\
-  "${URL}"/fire | jq '.x')
-echo -e "\033[31m${NAME} shoot from ${X} to ${x}\033[0m"
-}
-
-printAll
-
-while true; do
-  echo
-  echo    "#########################"
-  echo    "# Hi ${NAME}, you are at ${X}"
-  read -p "# angle: " angle
-  read -p "# velocity: " velocity
-  echo    "#########################"
-  echo 
-  fire "${angle}" "${velocity}"
-  printAll
-done
+echo "TEST: fire an arrow of angle 20 degrees and velocity 40"
+curl -s -X POST -H 'Content-Type: application/json' "${URL}/fire" \
+  -d '{"id":'"${ID}"',"angle":20,"velocity":40}'
 

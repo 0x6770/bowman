@@ -7,7 +7,7 @@ declare global {
 }
 
 interface ArrowStatus {
-  x: number;
+  x0: number;
   angle: number;
   color: string;
 }
@@ -15,16 +15,17 @@ interface ArrowStatus {
 interface PlayerStatus {
   name: string;
   hp: number;
-  x: number;
+  x0: number;
   color: string;
 }
 
 interface wsMessage {
-  method: string;
+  method: "fire" | "players" | "update";
   id?: string;
-  x?: number;
+  x0?: number; // original position
+  x?: number; // final position
   angle?: number;
-  c?: number;
+  c?: number; // air drag coefficient
   velocity?: number;
   color?: string;
   players?: PlayerStatus[];
