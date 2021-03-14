@@ -18,24 +18,14 @@ const generateUniqCode = (): string => {
 
 export class Player {
   private name: string;
-  private id: string;
+  private id: string = v4.generate();
   private x = Math.ceil(X_MAX / 10 + Math.random() * X_MAX * (8 / 10)); // initial position on the map
   private hp = 100; // health point
   private color: string;
 
-  constructor({ name, id }: { name: string; id: string }) {
-    if (v4.validate(id)) {
-      this.name = name;
-      this.id = id;
-      this.color = generateUniqCode();
-    } else {
-      // deal with invalid id
-      this.name = "";
-      this.id = "";
-      this.x = -1;
-      this.hp = 0;
-      this.color = "";
-    }
+  constructor({ name }: { name: string }) {
+    this.name = name;
+    this.color = generateUniqCode();
   }
 
   public getName() {

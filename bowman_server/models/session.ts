@@ -12,7 +12,9 @@ export class Session {
   }
 
   public addPlayer(player: Player) {
-    console.log(`${player.getName()} joined game`);
+    console.log(
+      `Player ${player.getName()} joined game, id: ${player.getId()}`
+    );
     this.players.set(player.getId(), player);
     this.arrows.set(
       player.getId(),
@@ -21,7 +23,9 @@ export class Session {
   }
 
   public deletePlayer(id: string) {
-    console.log(`${this.players.get(id)!.getName()} quit game`);
+    console.log(
+      `Player ${this.players.get(id)!.getName()} quit game, id: ${id}`
+    );
     this.players.delete(id);
     this.arrows.delete(id);
   }
@@ -52,21 +56,22 @@ export class Session {
     id: string;
     angle: number;
     velocity: number;
-  }): { msg: string; x: number; c: number } {
+  }): { msg: string; x0: number; x: number; c: number; color: string } {
     if (this.checkId(id)) {
       console.error("Invalid ID.");
-      return { msg: "Invalid id", x: 0, c: 0 };
+      return { msg: "Invalid id", x0: 0, x: 0, c: 0, color: "" };
     }
     if (this.players.get(id)!.getHp() == 0) {
       console.error("Player has 0 HP, cannot fire.");
-      return { msg: "Player died", x: 0, c: 0 };
+      return { msg: "Player died", x0: 0, x: 0, c: 0, color: "" };
     }
 
     const x0 = this.players.get(id)!.getX();
+    const color = this.players.get(id)!.getColor();
     const arrow = new Arrow({
       x: x0,
       y: 0,
-      color: this.players.get(id)!.getColor(),
+      color: color,
     });
     arrow.fire({ angle: angle, velocity: velocity });
     const x = Math.round(arrow.getXDistance());
@@ -95,6 +100,6 @@ export class Session {
         }
       }
     }
-    return { msg: "success", x: x, c: c };
+    return { msg: "success", x0: x0, x: x, c: c, color: color };
   }
 }
