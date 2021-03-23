@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bowman</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"
+      integrity="sha512-74AKPNm8Tfd5E9c4otg7XNkIVfIe5ynON7wehpX/9Tv5VYcZvXZBAlcgOAjLHg6HeWyLujisAnle6+iKnyWd9Q=="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.15/paper-full.js"
+      integrity="sha512-XV5MGZ7Tv+G60rzU8P7tPUlaf0yz7SJ/uI9CLAwyLcZKl9kzxJQFs3nsBNZVNVAwNOkBLqrzMvjGMEycDccqiA=="
+      crossorigin="anonymous"
+    ></script>
+    <script type="text/javascript" charset="utf-8">
+      paper.install(window);
+      console.log("connecting to {{ url }} ...")
+      const socket = io("{{ url }}");
+      socket.on("timer", (data) => {
+        const { turn, time } = data;
+        if (time<0) {
+          document.getElementById("timer").innerText = ``
+        } else {
+          document.getElementById("timer").innerText = `${time}s`
+        }
+
+        if (turn>0) {
+          document.getElementById("turn").innerText = `Turn: ${turn}`
+        } else if (turn<0) {
+          document.getElementById("turn").innerText = `Game Over`
+        } else {
+          document.getElementById("turn").innerText = ``
+        }
+      })
+      socket.on("update", (data) => {
+        console.log("Received update from server.");
+        console.log(data)
+        const { players, arrows } = data;
+        if (players[0] == null) {
+          document.getElementById("prompt").innerText = "Waiting for players to join..."
+        }else {
+          document.getElementById("prompt").innerText = ""
+        }
+        <!--console.log(players);-->
+        <!--console.log(arrows);-->
+        window.globals.players = players;
+        window.globals.draw_players(players);
+        <!--window.globals.arrows = arrows;-->
+        <!--window.globals.draw_arrows(arrows);-->
+      });
+      socket.on("fire", (data) => {
+        <!--console.log(JSON.parse(data));-->
+        const { c, color, x0, angle, velocity } = JSON.parse(data);
+        console.log(`An arrow is fired from x:${x0}`);
+        var trajectory = {
+          c: c,
+          x: x0,
+          y: 0,
+          vx: velocity * Math.cos((angle / 180) * Math.PI),
+          vy: velocity * Math.sin((angle / 180) * Math.PI),
+          tj: window.globals.init_trajectory(color, x0, 0),
+        };
+        window.globals.trajectories.push(trajectory);
+      });
+      socket.on("connect", () => {
+        socket.send("request");
+        console.log("Send request for players information.")
+      });
+    </script>
+    <script type="text/paperscript" canvas="canvas">
+      globals = { players: [], arrows: [], trajectories: []};
+      function draw_player(color, x0, hp, name) {
+        var unit_x = view.size.width/100;
+        var unit_y = view.size.height/100;
+        var size = 2 * unit_x;
+        var x = x0 * unit_x;
+        var y = view.size.height-100;
+        var color = hp < 1 ? "grey" : color
+
+        var name = new PointText({
+          position: [x, y-3*unit_x],
+          fillColor: color,
+          justification: "center",
+          fontSize: 16,
+          content: name,
+        });
+
+        var hp = new PointText({
+          position: [x, y-3*unit_x-20],
+          fillColor: color,
+          justification: "center",
+          fontSize: 16,
+          content: "hp: "+hp,
+        });
+
+        var x_mark = new PointText({
+          position: [x, y+30],
+          fillColor: "#efefef",
+          justification: "center",
+          fontSize: 16,
+          content: "x: "+x0,
+        });
+
+        var square = new Shape.Rectangle({
+          position: [x, y-size/2],
+          size: size,
+          fillColor: color,
+        });
+
+        var player_group = new Group([name, hp, x_mark, square]);
+        return player_group;
+      };
+
+      function draw_arrow(color, x0, angle) {
+        var unit_x = view.size.width/100;
+        var unit_y = view.size.height/100;
+        var size = 2 * unit_x;
+        var x = x0 * unit_x;
+        var y = view.size.height-100;
+
+        var line = new Path();
+        line.strokeColor = color;
+        line.strokeWidth = 4;
+        var bottom = new Point(x, y);
+        var top = new Point(x+50, y);
+        line.add(bottom);
+        line.add(top);
+        line.rotate(-angle, bottom);
+
+        var arrow_group = new Group([line]);
+        return arrow_group;
+      }
+
+      globals.draw_arrows = function(arrows) {
+        for (var i=0; i<arrows.length; i++) {
+          var arrow = arrows[i];
+          globals.arrows_group.addChild(draw_arrow(arrow.color, arrow.x0, arrow.angle));
+        }
+      }
+
+      globals.draw_players = function(players) {
+        globals.players_group.removeChildren();
+        for (var i=0; i<players.length; i++) {
+          var player = players[i];
+          globals.players_group.addChild(draw_player(player.color, player.x0, player.hp, player.name));
+        }
+      }
+
+      var backgturn = new Shape.Rectangle({
+          position: view.center + [0, (view.size.height-100)/2],
+          size: new Size(view.size.width, 100),
+          fillColor: "#333333"
+      });
+
+      globals.arrows_group = new Group();
+      globals.players_group = new Group();
+
+      globals.init_trajectory = function(color, x0, y) {
+        var tj = new Path({ strokeColor: color, strokeWidth: 2 });
+        tj.add(new Point(x0/100*view.size.width, view.size.height-y/100*view.size.width-100));
+        return tj;
+      }
+
+      function update(arrow) {
+        var a = -10;
+        var t = 0.1;
+        var width = view.size.width;
+        var height = view.size.height;
+        if (arrow.y>=0){
+          arrow.x += arrow.vx*t;
+          arrow.y += (a*t*t)/2+arrow.vy*t;
+          arrow.vx += (arrow.vx>0?-arrow.c:arrow.c)*arrow.vx*arrow.vx*t;
+          arrow.vy += a*t+(arrow.vy>0?-arrow.c:arrow.c)*arrow.vy*arrow.vy*t;
+          point = new Point(arrow.x/100*width,height-arrow.y/100*width-100);
+          arrow.tj.add(point);
+        }
+      }
+
+      function onFrame(event) {
+        for (var i=0; i<globals.trajectories.length; i++) {
+          update(globals.trajectories[i])
+        }
+      }
+
+      function onResize() {
+        backgturn.position = view.center + [0, (view.size.height-100)/2];
+        backgturn.size = [view.size.width, 100];
+        globals.draw_players(globals.players)
+        <!--globals.draw_arrows(globals.arrows)-->
+        <!--globals.arrows_group.removeChildren();-->
+      }
+    </script>
+  </head>
+  <body>
+    <h1 id="prompt"></h1>
+    <h2 id="timer"></h2>
+    <h1 id="turn"></h1>
+    <canvas id="canvas" resize stats />
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+  </body>
+  <style>
+    html,
+    body {
+      margin: 0;
+      overflow: hidden;
+      height: 100%;
+    }
+    /* Scale canvas with resize attribute to full size */
+    canvas[resize] {
+      width: 100%;
+      height: 100%;
+    }
+    #turn{
+      font-family: Arial, Helvetica, sans-serif;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #timer {
+      font-family: Arial, Helvetica, sans-serif;
+      position: absolute;
+      top: 0;
+      right: 10%;
+    }
+    #prompt {
+      font-family: Arial, Helvetica, sans-serif;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateY(-50%);
+      transform: translateX(-50%);
+    }
+  </style>
+</html>
