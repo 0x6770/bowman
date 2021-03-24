@@ -105,3 +105,17 @@ summary.html
 system.h
 
 workspace/
+*.vhd
+*.debuginfo
+*.sv
+*.gdb
+*.cmp
+*.html
+*.sdc
+*.mif
+*.htm
+*_bsp
+
+bow/qsys_system/bowman
+bow/quartus/software/Game_V4/.force_relink
+create-this-app
