@@ -74,17 +74,17 @@ def send_on_jtag(hp: int):
     print(f"[JTAG]   : sending hp = {hp} to the board")
     input_cmd = f"nios2-terminal --flush <<< {hp}"
 
-    try: 
+    try:
         output = run(input_cmd, shell=True, executable='/bin/bash', stdout=PIPE, check=True)
     except CalledProcessError as error:
         print(error)
     vals = output.stdout
     vals = vals.decode("utf8")
-    print(vals)
+    # print(vals)
     vals = vals.split("<-->")
     val = vals[1].strip()
     data = loads(val)
-    print(data)
+    # print(data)
     angle = data["angle"]
     velocity = data["velocity"]
     return angle, velocity
