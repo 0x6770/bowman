@@ -28,8 +28,10 @@
 
         if (turn>0) {
           document.getElementById("turn").innerText = `Turn: ${turn}`
+          document.getElementById("start").style.display = "none";
         } else if (turn<0) {
           document.getElementById("turn").innerText = `Game Over`
+          document.getElementById("start").style.display = "block";
         } else {
           document.getElementById("turn").innerText = ``
         }
@@ -197,6 +199,10 @@
     <h1 id="prompt"></h1>
     <h2 id="timer"></h2>
     <h1 id="turn"></h1>
+    <form id="start" action="http://localhost:1818/start" method="POST" target="hiddenFrame">
+      <iframe style="display:none" name="hiddenFrame" class="hide"></iframe>
+      <button>Start</button>
+    </form>
     <canvas id="canvas" resize stats />
     <noscript>You need to enable JavaScript to run this app.</noscript>
   </body>
