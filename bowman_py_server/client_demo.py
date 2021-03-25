@@ -23,6 +23,13 @@ def connect():
     print("I'm connected!")
 
 @sio.event
+# data = {
+#   "turn": int,
+#   "players": List [
+#     "pid": str,
+#     "hp": int,
+#   ]
+# }
 def turn(data):
     global TURN
     TURN = data["turn"]
@@ -43,6 +50,10 @@ except exceptions.ConnectionError as e:
 def main():
     global PID, TURN
 
+    # response = {
+    #   "msg": "success" | str,
+    #   "pid": str
+    # }
     player1 = post(url = URL+"/join", json = {"name":"111"}).json()
     player2 = post(url = URL+"/join", json = {"name":"111"}).json()
 
@@ -64,6 +75,15 @@ def main():
     while TURN >= 0:
         # fire arrow
         data1 = {"pid":pid1,"angle":40,"velocity":20}
+        # response = {
+        #   "msg": "success" | str,
+        #   "x0": int, 
+        #   "x": int,
+        #   "c": int, 
+        #   "color": str,
+        #   "angle": int,
+        #   "velocity": int
+        # }
         post(url = URL+"/fire", json = data1)
         data2 = {"pid":pid2,"angle":30,"velocity":20}
         post(url = URL+"/fire", json = data2)
