@@ -68,7 +68,6 @@ incremental_db/
 *.pin
 *.qws
 *.sld
-*.sof
 *.fit
 *.bak
 *.sopcinfo
