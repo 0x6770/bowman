@@ -54,7 +54,7 @@ bowman_de10_lite/software/bowman_nios2_bsp/summary.html
 bowman_de10_lite/software/bowman_nios2_bsp/system.h
 
 
-*.sopcinfo
+
 
 .qsys_system/
 .qsys_edit/
@@ -70,10 +70,10 @@ incremental_db/
 *.sld
 *.fit
 *.bak
-*.sopcinfo
+
 
 .qsys_edit
-*.sopcinfo
+
 
 .cproject
 .project
