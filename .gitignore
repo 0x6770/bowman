@@ -79,7 +79,6 @@ incremental_db/
 .cproject
 .project
 .settings
-*.elf
 obj/
 *.map
 *.objdump
