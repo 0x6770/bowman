@@ -57,7 +57,6 @@ def turn(data):
 
         #TODO: 从res中提取angle和velocity
         angle, velocity = send_on_jtag(HP)
-        velocity = (velocity+1)*10;
 
         this_turn_info = {"pid":PID,"angle":angle,"velocity":velocity}
         print("[CLIENT] : Time is up!")
@@ -72,21 +71,8 @@ def send_on_jtag(hp: int):
         and get 'angle' and 'velocity' from its response
     """
     print(f"[JTAG]   : sending hp = {hp} to the board")
-    input_cmd = f"nios2-terminal --flush <<< {hp}"
-
-    try: 
-        output = run(input_cmd, shell=True, executable='/bin/bash', stdout=PIPE, check=True)
-    except CalledProcessError as error:
-        print(error)
-    vals = output.stdout
-    vals = vals.decode("utf8")
-    print(vals)
-    vals = vals.split("<-->")
-    val = vals[1].strip()
-    data = loads(val)
-    print(data)
-    angle = data["angle"]
-    velocity = data["velocity"]
+    angle = 45
+    velocity = 20
     return angle, velocity
 
 def main():
