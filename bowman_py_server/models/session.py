@@ -241,7 +241,7 @@ class Session:
             if pid != _pid:
                 x_diff = abs(player.get_x() - x)
                 if x_diff <= 1:
-                    player.hurt(100) # hp -= 100; Game over
+                    player.hurt(50) # hp -= 50
                     print(f"\t Player {player.get_name()} is hurt {player.get_hp()} hp left")
                 # elif x_diff <= 3:
                     # player.hurt(50) # hp -= 50
