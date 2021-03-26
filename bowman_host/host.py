@@ -5,7 +5,6 @@
 from sys import  exit, platform
 from subprocess import run, CalledProcessError, PIPE
 from json import loads
-from time import sleep
 from socketio import Client, exceptions
 from requests import post
 
@@ -56,9 +55,8 @@ def turn(data):
             quit_game("[SERVER] : Game over.")
         print(f"[SERVER] : Your current HP: {HP}")
 
-        #TODO: 从res中提取angle和velocity
         angle, velocity = send_on_jtag(HP)
-        velocity = (velocity+1)*10;
+        velocity = (velocity+1)*10
 
         this_turn_info = {"pid":PID,"angle":angle,"velocity":velocity}
         print("[CLIENT] : Time is up!")
@@ -74,7 +72,7 @@ def send_on_jtag(hp: int):
     """
     print(f"[JTAG]   : sending hp = {hp} to the board")
 
-    nios2 = "nios2-terminal.exe" if platform is "win32" else "nios2-terminal"
+    nios2 = "nios2-terminal.exe" if "win32" in platform else "nios2-terminal"
     input_cmd = f"{nios2} --flush <<< {hp}"
 
     try:
@@ -106,7 +104,7 @@ def main():
             port = input("           Please input server port: ")
             break
         if 'q' in use_default:
-            sys.exit()
+            exit()
         print("\033[0;31m[CLIENT] : Invalid choice\033[0m")
         use_default = input(prompt)
     URL = "http://"+host+":"+port
