@@ -15,11 +15,13 @@
       crossorigin="anonymous"
     ></script>
     <script type="text/javascript" charset="utf-8">
+      let TURN = 0;
       paper.install(window);
       console.log("connecting to {{ url }} ...")
       const socket = io("{{ url }}");
       socket.on("timer", (data) => {
         const { turn, time } = data;
+        TURN = turn;
         if (time<0) {
           document.getElementById("timer").innerText = ``
         } else {
@@ -31,7 +33,7 @@
           document.getElementById("start").style.display = "none";
         } else if (turn<0) {
           document.getElementById("turn").innerText = `Game Over`
-          document.getElementById("start").style.display = "block";
+          document.getElementById("one-more-turn-button").style.display= `inline-block`
         } else {
           document.getElementById("turn").innerText = ``
         }
@@ -44,13 +46,12 @@
           document.getElementById("prompt").innerText = "Waiting for players to join..."
         }else {
           document.getElementById("prompt").innerText = ""
+          if (TURN<1 && players.length >1){
+            document.getElementById("start").style.display = "block";
+          }
         }
-        <!--console.log(players);-->
-        <!--console.log(arrows);-->
         window.globals.players = players;
         window.globals.draw_players(players);
-        <!--window.globals.arrows = arrows;-->
-        <!--window.globals.draw_arrows(arrows);-->
       });
       socket.on("fire", (data) => {
         <!--console.log(JSON.parse(data));-->
@@ -72,13 +73,14 @@
       });
     </script>
     <script type="text/paperscript" canvas="canvas">
+      var bg_height = 150;
       globals = { players: [], arrows: [], trajectories: []};
       function draw_player(color, x0, hp, name) {
         var unit_x = view.size.width/100;
         var unit_y = view.size.height/100;
         var size = 2 * unit_x;
         var x = x0 * unit_x;
-        var y = view.size.height-100;
+        var y = view.size.height-bg_height+size;
         var color = hp < 1 ? "grey" : color
 
         var name = new PointText({
@@ -120,7 +122,7 @@
         var unit_y = view.size.height/100;
         var size = 2 * unit_x;
         var x = x0 * unit_x;
-        var y = view.size.height-100;
+        var y = view.size.height-bg_height;
 
         var line = new Path();
         line.strokeColor = color;
@@ -150,8 +152,8 @@
         }
       }
 
-      var backgturn = new Shape.Rectangle({
-          position: view.center + [0, (view.size.height-100)/2],
+      var background = new Shape.Rectangle({
+          position: view.center + [0, (view.size.height-bg_height)/2],
           size: new Size(view.size.width, 100),
           fillColor: "#333333"
       });
@@ -161,13 +163,13 @@
 
       globals.init_trajectory = function(color, x0, y) {
         var tj = new Path({ strokeColor: color, strokeWidth: 2 });
-        tj.add(new Point(x0/100*view.size.width, view.size.height-y/100*view.size.width-100));
+        tj.add(new Point(x0/100*view.size.width, view.size.height-y/100*view.size.width-bg_height));
         return tj;
       }
 
       function update(arrow) {
-        var a = -10;
-        var t = 0.1;
+        var a = -10; // acceleration
+        var t = 0.05; // time for each iteration
         var width = view.size.width;
         var height = view.size.height;
         if (arrow.y>=0){
@@ -175,7 +177,7 @@
           arrow.y += (a*t*t)/2+arrow.vy*t;
           arrow.vx += (arrow.vx>0?-arrow.c:arrow.c)*arrow.vx*arrow.vx*t;
           arrow.vy += a*t+(arrow.vy>0?-arrow.c:arrow.c)*arrow.vy*arrow.vy*t;
-          point = new Point(arrow.x/100*width,height-arrow.y/100*width-100);
+          point = new Point(arrow.x/100*width,height-arrow.y/100*width-bg_height);
           arrow.tj.add(point);
         }
       }
@@ -187,8 +189,8 @@
       }
 
       function onResize() {
-        backgturn.position = view.center + [0, (view.size.height-100)/2];
-        backgturn.size = [view.size.width, 100];
+        background.position = view.center + [0, (view.size.height-bg_height)/2];
+        background.size = [view.size.width, bg_height];
         globals.draw_players(globals.players)
         <!--globals.draw_arrows(globals.arrows)-->
         <!--globals.arrows_group.removeChildren();-->
@@ -201,8 +203,9 @@
     <h1 id="turn"></h1>
     <form id="start" action="http://localhost:1818/start" method="POST" target="hiddenFrame">
       <iframe style="display:none" name="hiddenFrame" class="hide"></iframe>
-      <button>Start</button>
+      <button id="start-button">Start</button>
     </form>
+    <button id="one-more-turn-button" onClick="window.location.reload();">One More Turn!</button>
     <canvas id="canvas" resize stats />
     <noscript>You need to enable JavaScript to run this app.</noscript>
   </body>
@@ -212,27 +215,74 @@
       margin: 0;
       overflow: hidden;
       height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
     }
     /* Scale canvas with resize attribute to full size */
     canvas[resize] {
       width: 100%;
       height: 100%;
     }
+    #start{
+      display: none;
+      top: 0;
+      left: 0;
+    }
+    #start-button{
+      position: absolute;
+      display: inline-block;
+      border-radius: 1rem;
+      padding: 0.5rem 1rem;
+      border: solid 5px #AE3244;
+      text-decoration: none;
+      font-weight: 300;
+      font-size: 3rem;
+      color: #AE3244;
+      background-color: #FEFEFE;
+      text-align: center;
+      top: 50%;
+      left: 50%;
+      transform: translateY(-50%);
+      transform: translateX(-50%);
+    }
+    #start-button:hover{
+      color: #FEFEFE;
+      background-color: #AE3244;
+    }
+    #one-more-turn-button{
+      position: absolute;
+      display: none;
+      border-radius: 1rem;
+      padding: 0.5rem 1rem;
+      border: solid 5px #EE8080;
+      text-decoration: none;
+      font-weight: 300;
+      font-size: 3rem;
+      color: #EE8080;
+      background-color: #FEFEFE;
+      text-align: center;
+      top: 50%;
+      left: 50%;
+      transform: translateY(-50%);
+      transform: translateX(-50%);
+    }
+    #one-more-turn-button:hover{
+      color: #FEFEFE;
+      background-color: #EE8080;
+    }
     #turn{
-      font-family: Arial, Helvetica, sans-serif;
+      font-size: 3rem;
       position: absolute;
       top: 0;
       left: 50%;
       transform: translateX(-50%);
     }
     #timer {
-      font-family: Arial, Helvetica, sans-serif;
       position: absolute;
       top: 0;
       right: 10%;
     }
     #prompt {
-      font-family: Arial, Helvetica, sans-serif;
+      font-size: 3rem;
       position: absolute;
       top: 50%;
       left: 50%;

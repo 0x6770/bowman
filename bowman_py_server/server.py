@@ -48,6 +48,7 @@ session = Session(generate_uniq_code())
 async def keep_running(turn_total):
     """ deal with game turns
     """
+    global players, arrows
     while True:
         global session
         current_turn = session.get_turn()
@@ -61,6 +62,8 @@ async def keep_running(turn_total):
                         current_turn = session.get_turn()
                         break
             # the old game session is over
+            players = []
+            arrows = []
             await sio.emit("new", broadcast=True)
             await sio.emit("timer", {"time":-1,"turn":-1}, broadcast=True)
             await sio.emit("turn", {"players":players,"turn":-1}, broadcast=True)

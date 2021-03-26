@@ -2,7 +2,7 @@
 """ This is an interactive client that can connect to remote server via
     Socket IO and send post request to join game, fire arrow and
 """
-import sys
+from sys import  exit, platform
 from subprocess import run, CalledProcessError, PIPE
 from json import loads
 from time import sleep
@@ -15,6 +15,7 @@ TURN = -1
 PID = None
 HP = -1
 sio = Client()
+PLATFORM = platform
 
 def quit_game(msg: str):
     """ terminate this client
@@ -22,13 +23,13 @@ def quit_game(msg: str):
     print(msg)
     if sio.connected:
         sio.disconnect()
-    sys.exit()
+    exit()
 
 @sio.event
 def turn(data):
     """ get updated player information at the start of each turn
         and end of the game
-        {
+        data: {
             turn: int
             players: [{pid: int, hp: int}]
         }
@@ -52,7 +53,7 @@ def turn(data):
                 HP = player["hp"]
         if HP == 0:
             print("[SERVER] : Your HP is 0")
-            quit_game("[SERVER]\t:Game over.")
+            quit_game("[SERVER] : Game over.")
         print(f"[SERVER] : Your current HP: {HP}")
 
         #TODO: 从res中提取angle和velocity
@@ -72,19 +73,20 @@ def send_on_jtag(hp: int):
         and get 'angle' and 'velocity' from its response
     """
     print(f"[JTAG]   : sending hp = {hp} to the board")
-    input_cmd = f"nios2-terminal --flush <<< {hp}"
+
+    nios2 = "nios2-terminal.exe" if platform is "win32" else "nios2-terminal"
+    input_cmd = f"{nios2} --flush <<< {hp}"
 
     try:
         output = run(input_cmd, shell=True, executable='/bin/bash', stdout=PIPE, check=True)
     except CalledProcessError as error:
-        print(error)
+        quit_game(error)
+
     vals = output.stdout
     vals = vals.decode("utf8")
-    # print(vals)
     vals = vals.split("<-->")
     val = vals[1].strip()
     data = loads(val)
-    # print(data)
     angle = data["angle"]
     velocity = data["velocity"]
     return angle, velocity

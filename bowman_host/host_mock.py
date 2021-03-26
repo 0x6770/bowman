@@ -52,7 +52,7 @@ def turn(data):
                 HP = player["hp"]
         if HP == 0:
             print("[SERVER] : Your HP is 0")
-            quit_game("[SERVER]\t:Game over.")
+            quit_game("[SERVER] : Game over.")
         print(f"[SERVER] : Your current HP: {HP}")
 
         #TODO: 从res中提取angle和velocity

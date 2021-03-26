@@ -116,6 +116,8 @@ class Session:
         """
         num_player = len(self.__players)
         num_player_completed = 0
+        num_player_alive = num_player
+        print(f"{num_player} players in the game")
 
         if num_player == 0 or self.__turn == 0:
             # print("Game has not been started yet")
@@ -123,22 +125,28 @@ class Session:
 
         for pid, player in self.__players.items():
             if player.get_hp() == 0:
+                print(f"player {player.get_name()} has {player.get_hp()} hp")
                 num_player_completed += 1
-            elif player.get_turn() == self.__turn:
+                num_player_alive -= 1
+            elif player.get_turn() >= self.__turn:
                 num_player_completed += 1
-            elif time() > player.get_time_end():
+            elif time() >= player.get_time_end():
                 num_player_completed += 1
                 player.update_turn()
         print(f"{num_player_completed}/{num_player} has completed turn {self.__turn}")
 
-        if num_player_completed == num_player:
+        if num_player_alive < 2:
+            self.__turn = TURN+1
+            print(f"Only one player left, game over")
+            return True
+
+        if num_player == num_player_completed:
             self.__turn += 1
             print(f"New turn started, turn {self.__turn}")
             for pid, player in self.__players.items():
                 player.next_turn()
             return True
 
-        # print("not all players have completed this turn")
         return False
 
     def change_angle(self, pid: str, angle: int):
@@ -235,9 +243,9 @@ class Session:
                 if x_diff <= 1:
                     player.hurt(100) # hp -= 100; Game over
                     print(f"\t Player {player.get_name()} is hurt {player.get_hp()} hp left")
-                elif x_diff <= 3:
-                    player.hurt(50) # hp -= 50
-                    print(f"\t Player {player.get_name()} is hurt {player.get_hp()} hp left")
+                # elif x_diff <= 3:
+                    # player.hurt(50) # hp -= 50
+                    # print(f"\t Player {player.get_name()} is hurt {player.get_hp()} hp left")
         return {"msg": "success",
                 "x0": x0,
                 "x": x,
