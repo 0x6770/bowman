@@ -2,6 +2,7 @@
 """ This file defines how does the server work
 """
 from os import environ
+from time import time
 from json import dumps
 from asyncio import sleep, create_task
 from random import randint
@@ -202,17 +203,26 @@ async def fire_arrow(request: FireRequest):
         return result
     return result
 
+@app.get("/latency")
+async def latency(request: Request):
+    return {"ts":time()}
+
 # define socket io event handler
 @sio.on("connect")
 def connect(sid, environ):
     print(f"Client connected, {sid}")
 
 @sio.on("message")
-async def handle_message(pid, message):
-    print(f"Received message: \"{message}\" from {pid}")
+async def handle_message(sid, message):
+    print(f"Received message: \"{message}\" from {sid}")
     global players, arrows
     await sio.emit("update", {"players":players,"arrows":arrows,"turn":session.get_turn()},
-            room=pid)
+            room=sid)
+
+@sio.on("latency test")
+async def latency_server(sid, data):
+    now = time()
+    await sio.emit("latency", {"tc":data["tc"],"ts":now}, room=sid)
 
 @sio.on("disconnect")
 def disconnect(sid):
