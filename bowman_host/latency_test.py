@@ -11,7 +11,7 @@ from requests import post, get, exceptions as request_exceptions
 
 sio = AsyncClient()
 TOTAL_LATENCY = {"websocket":{"c2s":0,"s2c":0},"http":{"c2s":0,"s2c":0}}
-NUM_LOOP = 5000
+NUM_LOOP = 1000
 NUM_RECEIVED = {"websocket":0,"http":0}
 
 @sio.on("latency")
@@ -36,7 +36,7 @@ async def latency(data):
 
 async def send():
     await sio.emit("latency test", {"tc":time()})
-    await sio.sleep(0.001)
+    await sio.sleep(0.02)
 
 async def main():
     """ main function
